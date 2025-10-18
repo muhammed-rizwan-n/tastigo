@@ -20,16 +20,33 @@ export function LoginPage({ onLogin, onBackToHome }: LoginPageProps) {
     e.preventDefault();
     setIsLoading(true);
 
-    // Mock authentication - in production, this would call a real API
-    setTimeout(() => {
-      if (username === "admin" && password === "tastigo123") {
-        toast.success("Login successful! Welcome back, Admin.");
-        onLogin();
-      } else {
-        toast.error("Invalid credentials. Please try again.");
-      }
+    const handleLogin = async (username: string,password: string) => {
+  try {
+    const response = await fetch("http://localhost:5000/api/auth/signin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("✅ Login successful!");
+      //localStorage.setItem("token", data.token); // store JWT
       setIsLoading(false);
-    }, 800);
+      onLogin();
+      // navigate("/dashboard"); // if using React Router
+    } else {
+      alert(`❌ ${data.error || "Invalid credentials"}`);
+    }
+  } catch (error) {
+    alert("⚠️ Network error. Please try again.");
+    console.error(error);
+  }
+  setIsLoading(false);
+
+};
+handleLogin(username, password);
   };
 
   return (
